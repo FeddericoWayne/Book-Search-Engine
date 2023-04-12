@@ -37,12 +37,12 @@ const resolvers = {
             const token = signToken(user);
             return { token, user };
         },
-        saveBook: async (parent, args ,context) => {
+        saveBook: async (parent, { bookId, authors, description, title, image, link } ,context) => {
             if (context.user) {
                 const user = await User.findOneAndUpdate(
                     { username: context.user.username },
-                    { $addToSet: { saveBooks: args } }
-                )
+                    { $addToSet: { savedBooks: { bookId, authors, description, title, image, link } } }
+                ).populate('savedBooks');
                 return user;
             };
             throw new AuthenticationError('You need to be logged in!');
@@ -52,7 +52,7 @@ const resolvers = {
 
                 const user = await User.findOneAndUpdate(
                     { username: context.user.username },
-                    { $pull: { saveBooks: bookId }}
+                    { $pull: { savedBooks: bookId }}
                 )
                 return user;
             }
